@@ -14,3 +14,6 @@ CREATE TABLE IF NOT EXISTS bronze.dead_letter_queue (
     error_message TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+
+
