@@ -1,5 +1,5 @@
 
-```markdown
+
 # GitHub Event Data Pipeline 🚀
 
 A robust, near real-time data pipeline that ingests high-volume public GitHub events into a PostgreSQL Data Warehouse using a **Medallion Architecture** (Bronze $\rightarrow$ Silver $\rightarrow$ Gold).
