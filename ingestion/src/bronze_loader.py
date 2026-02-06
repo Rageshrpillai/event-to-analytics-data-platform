@@ -11,7 +11,7 @@ sys.path.append(str(current_dir))
 from config import Config
 from logger import get_logger
 
-logger = get_logger("BRONZE_LOADER")
+logger = get_logger("BRONZE_LOADER", log_filename="bronze.log")
 
 def load_to_bronze(events: List[Dict[str, Any]]):
     """
