@@ -23,7 +23,7 @@ shutdown_flag = False
 
 def signal_handler(signum, frame):
     global shutdown_flag
-    logger.info("🛑 Shutdown signal received. Finishing current batch...")
+    logger.info(" Shutdown signal received. Finishing current batch...")
     shutdown_flag = True
 
 signal.signal(signal.SIGINT, signal_handler)
@@ -60,7 +60,7 @@ def run_pipeline():
             elapsed = time.time() - start_time
             sleep_time = max(10, 60 - elapsed)
             
-            logger.info(f"💤 Sleeping for {int(sleep_time)} seconds...")
+            logger.info(f" Sleeping for {int(sleep_time)} seconds...")
             
             # Sleep in short bursts so we can catch Ctrl+C faster
             for _ in range(int(sleep_time)):
@@ -68,11 +68,11 @@ def run_pipeline():
                 time.sleep(1)
 
         except Exception as e:
-            logger.error(f"❌ Unexpected Error in Main Loop: {e}")
-            logger.info("💤 Retrying in 60 seconds...")
+            logger.error(f" Unexpected Error in Main Loop: {e}")
+            logger.info(" Retrying in 60 seconds...")
             time.sleep(60)
 
-    logger.info("👋 Pipeline stopped gracefully.")
+    logger.info(" Pipeline stopped gracefully.")
 
 if __name__ == "__main__":
     run_pipeline()

@@ -136,8 +136,8 @@ def process_silver():
                 rows = cursor.fetchall()
                 
                 if not rows:
-                    pipeline_logger.info("✅ Silver Layer is fully up to date.")
-                    silver_logger.debug("✅ Silver Layer is fully up to date")
+                    pipeline_logger.info(" Silver Layer is fully up to date.")
+                    silver_logger.debug(" Silver Layer is fully up to date")
                     break
                 
                 silver_batch = []
@@ -154,8 +154,8 @@ def process_silver():
                     silver_logger.info(f"   Saved {len(silver_batch)} events.")
                 
     except Exception as e:
-        pipeline_logger.error(f"❌ ETL Failed: {e}")
-        silver_logger.error(f"❌ ETL Failed: {e}")
+        pipeline_logger.error(f" ETL Failed: {e}")
+        silver_logger.error(f" ETL Failed: {e}")
     finally:
         if conn: conn.close()
 

@@ -61,7 +61,15 @@ VALUES
 
 -- Other
 ('GollumEvent',         'Other', 'Wiki Edit',    'Wiki page edited',                       FALSE, TRUE),
-('PublicEvent',         'Other', 'Made Public',  'Repository made public',                 FALSE, TRUE)
+('PublicEvent',         'Other', 'Made Public',  'Repository made public',                 FALSE, TRUE),
+
+
+-- ============================================================
+-- SENTINEL: Data Quality Placeholder
+-- ============================================================
+('UnknownEvent', 'Data Quality Issues', 'Unknown Event', 
+ 'Events with missing or invalid event_type from source data', FALSE, TRUE)
+
 
 ON CONFLICT (event_type) DO UPDATE 
 SET 

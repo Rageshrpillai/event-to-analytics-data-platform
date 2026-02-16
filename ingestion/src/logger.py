@@ -50,14 +50,14 @@ def get_logger(name: str, level: int = logging.INFO, log_filename: str = "pipeli
 
 # --- TEST BLOCK ---
 if __name__ == "__main__":
-    print(f"📁 Log directory: {LOG_DIR}")
+    print(f" Log directory: {LOG_DIR}")
     
     # Test 1: Default (goes to pipeline.log)
     default_logger = get_logger("TEST_DEFAULT")
-    default_logger.info("✅ This goes to the default 'pipeline.log'")
+    default_logger.info("This goes to the default 'pipeline.log'")
     
     # Test 2: Custom (goes to separate file)
     silver_logger = get_logger("SILVER_TEST", log_filename="silver_layer.log")
-    silver_logger.warning("⚠️ This specific warning goes to 'silver_layer.log'")
+    silver_logger.warning(" This specific warning goes to 'silver_layer.log'")
     
-    print("✅ Test complete. Check the 'logs' folder.")
+    print(" Test complete. Check the 'logs' folder.")

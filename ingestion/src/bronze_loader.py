@@ -19,7 +19,7 @@ def load_to_bronze(events: List[Dict[str, Any]]):
     Handles duplicates via 'ON CONFLICT DO NOTHING'.
     """
     if not events:
-        logger.info("⚠️ No events to load.")
+        logger.info(" No events to load.")
         return
 
     # 1. The Insert Query
@@ -67,7 +67,7 @@ def load_to_bronze(events: List[Dict[str, Any]]):
                         # --- ROW LEVEL ERROR HANDLING ---
                         conn.rollback() # Undo ONLY this failed row
                         error_count += 1
-                        logger.error(f"❌ Row Error: {row_error}")
+                        logger.error(f"Row Error: {row_error}")
                         
                         # Send to DLQ
                         try:
@@ -81,7 +81,7 @@ def load_to_bronze(events: List[Dict[str, Any]]):
                 logger.info(f" Batch Report: {success_count} Inserted | {duplicate_count} Duplicates | {error_count} Errors")
 
     except Exception as e:
-        logger.error(f"❌ Critical Database Connection Error: {e}")
+        logger.error(f" Critical Database Connection Error: {e}")
     finally:
         if conn: conn.close()
 

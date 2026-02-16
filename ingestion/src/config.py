@@ -59,11 +59,11 @@ class Config:
 if __name__ == "__main__":
     try:
         Config.validate()
-        print("✅ Configuration is valid.")
-        print(f"🔌 DB Host: {Config.DB_HOST}")
-        print(f"👤 DB User: {Config.DB_USER}")
+        print(" Configuration is valid.")
+        print(f" DB Host: {Config.DB_HOST}")
+        print(f" DB User: {Config.DB_USER}")
         # Securely check token presence
         token_status = "Yes" if Config.GITHUB_TOKEN else "No (Rate Limit: 60/hr)"
-        print(f"🔑 Token Present: {token_status}")
+        print(f" Token Present: {token_status}")
     except ValueError as e:
-        print("🛑 Configuration failed.")
+        print(" Configuration failed.")
