@@ -46,23 +46,23 @@ def run_pipeline():
         try:
             start_time = time.time()
             
-            # --- STEP 1: INGEST ---
+        
             # The API Client fetches data
             events = fetch_events()
             
-            # --- STEP 2: LOAD ---
+            
             # The Loader puts it into Postgres
             if events:
                 load_to_bronze(events)
             
-            # --- STEP 3: SLEEP ---
-            # We want to run every 60 seconds roughly
+            
+            #  run every 60 seconds roughly
             elapsed = time.time() - start_time
             sleep_time = max(10, 60 - elapsed)
             
             logger.info(f" Sleeping for {int(sleep_time)} seconds...")
             
-            # Sleep in short bursts so we can catch Ctrl+C faster
+            # Sleep in short bursts so it  can catch Ctrl+C faster
             for _ in range(int(sleep_time)):
                 if shutdown_flag: break
                 time.sleep(1)

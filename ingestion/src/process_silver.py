@@ -14,12 +14,11 @@ from config import Config
 from logger import get_logger
 
 
-# 1. Pipeline Logger (The Manager)
-# We DON'T pass log_filename, so it uses the default "pipeline.log"
+
+#  it uses the default "pipeline.log"
 pipeline_logger = get_logger("SILVER_JOB") 
 
-# 2. Silver Logger (The Inspector)
-# We MUST pass log_filename="silver.log" to override the default.
+#log_filename="silver.log" to override the default.
 silver_logger = get_logger("SILVER_DATA", level=logging.DEBUG, log_filename="silver.log")
 
 
@@ -33,8 +32,6 @@ BATCH_SIZE = 5000
 
 # ============================================================
 # 1. FETCH QUERY
-# We select ONLY full_json. We don't need the columns.
-# The database index still works for the filtering logic!
 # ============================================================
 FETCH_UNPROCESSED = """
     SELECT full_json
@@ -59,7 +56,6 @@ INSERT_SILVER = """
 """
 
 # ============================================================
-# 2. THE PURE TRANSFORM FUNCTION
 # Input: Only the JSON Dict
 # Output: The Silver Tuple
 # ============================================================
@@ -68,7 +64,7 @@ def extract_event(raw_json: dict) -> tuple | None:
     # A. Safety: Check the ID inside the source
     event_id = raw_json.get('id')
     if not event_id:
-            # We catch the bad row here and record it in silver.log
+            #  catch the bad row here and record it in silver.log
             silver_logger.warning(f" SKIPPED: JSON missing 'id'. Data sample: {str(raw_json)[:50]}...")
             return None
 
@@ -122,7 +118,7 @@ def extract_event(raw_json: dict) -> tuple | None:
 # ============================================================
 # 3. MAIN ETL LOOP
 # ============================================================
-def process_silver():
+def process_silver_layer():
     pipeline_logger.info(" STARTING SILVER ETL (PURE MODE)...")
     silver_logger.debug("STARTING SILVER ETL (PURE MODE)...")
     
@@ -160,4 +156,4 @@ def process_silver():
         if conn: conn.close()
 
 if __name__ == "__main__":
-    process_silver()
+    process_silver_layer()

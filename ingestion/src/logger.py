@@ -38,7 +38,6 @@ def get_logger(name: str, level: int = logging.INFO, log_filename: str = "pipeli
         logger.addHandler(console_handler)
         
         # 2. File Handler (Dynamic File)
-        # We construct the full path using the requested filename
         target_log_file = LOG_DIR / log_filename
         
         # mode='a' means "Append" (keep history)
