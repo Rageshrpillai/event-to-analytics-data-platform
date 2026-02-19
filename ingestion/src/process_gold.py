@@ -92,6 +92,7 @@ def process_gold_layer():
         if conn:
             conn.rollback()
             logger.warning(" TRANSACTION ROLLED BACK. No changes saved.")
+        raise e
         sys.exit(1)
 
     except Exception as e:
@@ -100,6 +101,7 @@ def process_gold_layer():
         logger.error(f" SYSTEM ERROR: {e}")
         if conn:
             conn.rollback()
+        raise e
         sys.exit(1)
 
     finally:

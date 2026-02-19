@@ -82,6 +82,7 @@ def load_to_bronze(events: List[Dict[str, Any]]):
 
     except Exception as e:
         logger.error(f" Critical Database Connection Error: {e}")
+        raise e
     finally:
         if conn: conn.close()
 

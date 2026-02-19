@@ -152,6 +152,9 @@ def process_silver_layer():
     except Exception as e:
         pipeline_logger.error(f" ETL Failed: {e}")
         silver_logger.error(f" ETL Failed: {e}")
+        if conn:
+            conn.rollback()
+        raise e
     finally:
         if conn: conn.close()
 

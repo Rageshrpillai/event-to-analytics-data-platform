@@ -1,0 +1,28 @@
+services:
+  # Process 1: The Continuous Listener (Bronze)
+  bronze-listener:
+    build: .
+    image: github_event_image
+    container_name: bronze_listener
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=host.docker.internal
+    volumes:
+      - ./ingestion/logs:/app/ingestion/logs
+    command: ["python", "ingestion/src/main.py"]
+    restart: unless-stopped
+
+  # Process 2: The ETL Scheduler (Silver and Gold)
+  silver-gold-etl:
+    build: .
+    image: github_event_image
+    container_name: silver_gold_etl
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=host.docker.internal
+    volumes:
+      - ./ingestion/logs:/app/ingestion/logs
+    command: ["python", "ingestion/src/process_etl.py"]
+    restart: unless-stopped

@@ -1,0 +1,24 @@
+#Avoiding venv files
+venv/
+.venv/
+
+
+# 2. Ignore compiled Python files
+#    (These are specific to Windows machine; Docker uses Linux)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+# 3. Ignore Git history
+.git/
+.gitignore
+
+# 4. Ignore local logs
+ingestion/logs/
+*.log
+
+# 5. SECURITY: Ignore secrets
+#    (NEVER bake passwords into an image. We inject them at runtime.)
+.env
