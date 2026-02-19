@@ -37,5 +37,5 @@ SELECT
     EXTRACT(ISODOW FROM datum) AS day_of_week,
     TO_CHAR(datum, 'FMDay') AS day_name,
     CASE WHEN EXTRACT(ISODOW FROM datum) IN (6, 7) THEN TRUE ELSE FALSE END AS is_weekend
-FROM generate_series('2020-01-01'::DATE, '2030-12-31'::DATE, '1 day') AS datum
+FROM generate_series('2010-01-01'::DATE, '2028-12-31'::DATE, '1 day') AS datum
 ON CONFLICT (date_id) DO NOTHING;

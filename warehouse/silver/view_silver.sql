@@ -59,4 +59,4 @@ SELECT
     -- 6. Flags
     COALESCE(is_public, true) AS is_public
 
-FROM silver.events;
+FROM silver.events WHERE event_time IS NOT NULL;

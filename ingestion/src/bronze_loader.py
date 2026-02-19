@@ -55,7 +55,10 @@ def load_to_bronze(events: List[Dict[str, Any]]):
                         e_json = json.dumps(event) 
 
                         # Execute the safe insert
+                        cursor.execute("SAVEPOINT row_save")
                         cursor.execute(insert_query, (e_id, e_type, e_json))
+                        cursor.execute("RELEASE SAVEPOINT row_save")
+       
                         
                        
                         if cursor.rowcount == 0:
@@ -65,7 +68,7 @@ def load_to_bronze(events: List[Dict[str, Any]]):
 
                     except Exception as row_error:
                         # --- ROW LEVEL ERROR HANDLING ---
-                        conn.rollback() # Undo ONLY this failed row
+                        cursor.execute("ROLLBACK TO SAVEPOINT row_save") 
                         error_count += 1
                         logger.error(f"Row Error: {row_error}")
                         
