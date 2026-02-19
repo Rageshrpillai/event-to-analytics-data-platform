@@ -1,9 +1,10 @@
 # GitHub Events Data Warehouse 🚀
 
-> Production-ready ETL pipeline processing GitHub's public events API into a dimensional data warehouse using **Medallion Architecture** (Bronze → Silver → Gold)
+> Production-style ETL pipeline ingesting GitHub's public events API into a dimensional data warehouse using **Medallion Architecture** (Bronze → Silver → Gold)
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://www.docker.com/)
 [![Architecture](https://img.shields.io/badge/Architecture-Medallion-green.svg)](https://www.databricks.com/glossary/medallion-architecture)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
@@ -11,28 +12,30 @@
 
 ## 📊 Project Overview
 
+A robust, near real-time data pipeline that continuously ingests high-volume public GitHub events into a PostgreSQL Data Warehouse using the **Medallion Architecture** (Bronze → Silver → Gold).
 
-A robust, near real-time data pipeline that ingests high-volume public GitHub events into a PostgreSQL Data Warehouse using a **Medallion Architecture** (Bronze $\rightarrow$ Silver $\rightarrow$ Gold).
+All four layers are fully operational: **Ingestion**, **Bronze**, **Silver**, and **Gold**.
 
-Currently, the **Ingestion Layer**, **Bronze Layer**, **Silver Layer**, and **Gold Layer** are fully operational.
+The pipeline runs as **two separate Dockerized processes** — a continuous Bronze ingestion listener and a scheduled Silver + Gold ETL transformer — reflecting how real production pipelines separate concerns between streaming ingestion and batch transformation.
+
+---
 
 ## 🏗 Architecture
 
-The pipeline uses a **Stateless Sliding Window** for ingestion and an **Incremental Batch** strategy for transformation.
+The pipeline uses a **Stateless Sliding Window** for ingestion and a **Watermark-based Incremental Batch** strategy for transformation.
 
-### **Medallion Pattern (Bronze → Silver → Gold)**
+### Medallion Pattern (Bronze → Silver → Gold)
 
 ```mermaid
 graph TD
-    %% Nodes
     GitHub[GitHub API <br/> /events]
-    
+
     subgraph Ingestion_Layer [Python Ingestion Layer]
         Orch[Orchestrator <br/> main.py]
         Fetcher[API Client]
         Loader[Bronze Loader]
     end
-    
+
     subgraph Storage_Layer [PostgreSQL Warehouse]
         Bronze[(Bronze Layer <br/> raw_events)]
         DLQ[(Dead Letter Queue <br/> bad_data)]
@@ -46,30 +49,28 @@ graph TD
         GoldProc[Gold Processor]
     end
 
-    %% Flow
     Orch -->|Trigger 60s| Fetcher
     GitHub -.->|JSON Stream| Fetcher
     Fetcher -.->|List of Events| Loader
-    
+
     Loader -->|Raw JSONB| Bronze
     Loader -.->|Failed Rows| DLQ
-    
+
     Scheduler -->|Trigger| SilverProc
     SilverProc -->|Read New| Bronze
     SilverProc -->|Cleaned Data| Silver
-    
+
     Scheduler -->|Trigger| GoldProc
     GoldProc -->|Read| Silver
     GoldProc -->|Update Dims & Facts| Gold
 
-    %% Styling
     classDef storage fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
     classDef process fill:#fff3e0,stroke:#ff6f00,stroke-width:2px;
     class Bronze,DLQ,Silver,Gold storage;
     class Fetcher,Loader,SilverProc,GoldProc,Orch,Scheduler process;
 ```
 
-### **Data Flow**
+### Data Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -78,15 +79,16 @@ graph TD
 │ • Continuous ingestion (every 60 seconds)                   │
 │ • Raw JSONB storage (immutable audit trail)                 │
 │ • Deduplication (ON CONFLICT DO NOTHING)                    │
-│ • Dead Letter Queue (failed rows isolation)                 │
+│ • Row-level savepoints (failed rows go to DLQ, batch safe) │
+│ • Dead Letter Queue (failed rows isolated, not lost)        │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
 │ SILVER LAYER (Transformation)                               │
 ├─────────────────────────────────────────────────────────────┤
-│ • Incremental batch processing (anti-join pattern)          │
+│ • Incremental batch processing (anti-join watermark)        │
 │ • Type casting with sentinel values (-1, 'unknownuser')     │
-│ • Data validation & quality checks                          │
+│ • NULL event_time rows filtered before Gold exposure        │
 │ • Watermark tracking (processed_at timestamp)               │
 └─────────────────────────────────────────────────────────────┘
                           ↓
@@ -94,9 +96,9 @@ graph TD
 │ GOLD LAYER (Star Schema)                                    │
 ├─────────────────────────────────────────────────────────────┤
 │ • Kimball dimensional model (4 dimensions + 1 fact)         │
-│ • Transactional loading (BEGIN...COMMIT)                    │
+│ • Transactional loading (all-or-nothing, auto rollback)     │
 │ • Late-arriving data protection (event_time ordering)       │
-│ • Type 1 SCD (slowly changing dimensions)                   │
+│ • Type 1 SCD (dimensions track current state)               │
 │ • Auto-discovery pattern (unknown event types)              │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -105,40 +107,44 @@ graph TD
 
 ## ⭐ Key Features
 
-### **1. Medallion Architecture**
+### 1. Medallion Architecture
 - ✅ **Bronze:** Immutable raw data lake (JSONB storage)
 - ✅ **Silver:** Cleaned, validated, structured data
 - ✅ **Gold:** Business-ready star schema for analytics
 
-### **2. Industrial-Grade ETL Patterns**
-- ✅ **Watermark-based incremental loading** (processes only new data)
-- ✅ **Transactional ETL** (all-or-nothing, automatic rollback on failure)
-- ✅ **Idempotent operations** (safe to re-run, no duplicates)
-- ✅ **Late-arriving data handling** (ORDER BY event_time prevents overwrites)
+### 2. Industrial-Grade ETL Patterns
+- ✅ **Watermark-based incremental loading** — processes only new data, scales to billions of rows
+- ✅ **Transactional ETL** — all-or-nothing, automatic rollback on failure, watermark unchanged on error so next run auto-retries
+- ✅ **Idempotent operations** — safe to re-run, no duplicates at any layer
+- ✅ **Late-arriving data protection** — `ORDER BY event_time DESC` in dimension upserts prevents old data overwriting current values
 
-### **3. Data Quality & Reliability**
-- ✅ **Dead Letter Queue** (failed rows don't crash pipeline)
-- ✅ **Sentinel values** (-1 for invalid IDs, 'unknownuser' for missing data)
-- ✅ **Safe type casting** (regex validation before BIGINT conversion)
-- ✅ **FK constraint enforcement** (fail-fast vs silent data loss)
+### 3. Data Quality & Reliability
+- ✅ **Row-level savepoints** — a single bad row rolls back only itself; the rest of the batch commits successfully
+- ✅ **Dead Letter Queue** — failed rows are isolated and persisted, not silently dropped
+- ✅ **Sentinel values** — `-1` actor/repo IDs map to `unknownuser`/`unknownrepo` dimension rows, satisfying FK constraints while keeping the pipeline running
+- ✅ **Safe type casting** — regex validation (`^[0-9]+$`) before BIGINT conversion prevents silent corrupt data
+- ✅ **NULL event_time filtering** — Silver view filters rows with unparseable timestamps before Gold ever sees them, preventing FK constraint crashes on the fact table
 
-### **4. Operational Excellence**
-- ✅ **Dual logging** (console + file-based logs per layer)
-- ✅ **Graceful shutdown** (Ctrl+C finishes current batch)
-- ✅ **Demo vs Production modes** (2-min cycles vs daily 2 AM runs)
-- ✅ **Performance timing** (per-step duration tracking)
+### 4. Schema Design
+- ✅ **Kimball star schema** — 4 dimensions + 1 fact table
+- ✅ **Smart date keys** — YYYYMMDD INT format for partition-friendly joins
+- ✅ **Type 1 SCD with conditional update** — `WHERE dim_actors.last_event_time < EXCLUDED.last_event_time` ensures only fresher data updates the dimension, not all upserts blindly overwrite
+- ✅ **Immutable facts** — historical events never change after Gold load
+- ✅ **Auto-discovery** — new GitHub event types are automatically inserted into `dim_event_types` as uncurated rows, pipeline never crashes on unknown types
 
-### **5. Schema Design**
-- ✅ **Star schema** (Kimball methodology)
-- ✅ **Smart date keys** (YYYYMMDD INT format for performance)
-- ✅ **Type 1 SCD** (dimensions track current state)
-- ✅ **Immutable facts** (historical events never change)
+### 5. Operational Excellence
+- ✅ **Dockerized** — two containers via Docker Compose, non-root user, secrets injected at runtime (never baked into image)
+- ✅ **Graceful shutdown** — `SIGINT`/`SIGTERM` handlers finish the current batch before stopping
+- ✅ **Dual logging** — structured logs per layer (console + file), `SILVER_DATA` logger file-only to avoid noise
+- ✅ **Demo vs Production modes** — 2-minute cycles for portfolio demo, 2 AM daily for production
+- ✅ **Performance timing** — per-step duration tracking via `CLOCK_TIMESTAMP()` in the Gold SQL script
+- ✅ **One-command setup** — `python setup_db.py` initializes all schemas and layers in correct dependency order
 
 ---
 
 ## 📐 Gold Layer Schema
 
-### **Star Schema Design**
+### Star Schema Design
 
 ```mermaid
 erDiagram
@@ -147,8 +153,8 @@ erDiagram
         DATE full_date
         INT year
         INT quarter
-        BOOLEAN is_weekend
         INT month
+        BOOLEAN is_weekend
     }
 
     DIM_ACTORS {
@@ -162,18 +168,20 @@ erDiagram
         BIGINT repo_id PK
         TEXT repo_name
         TEXT repo_owner
+        TEXT repo_project
         TEXT org_login
         TIMESTAMP updated_at
     }
 
     DIM_EVENT_TYPES {
         TEXT event_type PK
-        TEXT category
+        TEXT event_category
         BOOLEAN is_core_metric
+        BOOLEAN is_curated
     }
 
     FACT_EVENTS {
-        BIGINT event_id PK
+        VARCHAR event_id PK
         INT date_id FK
         BIGINT actor_id FK
         BIGINT repo_id FK
@@ -189,134 +197,146 @@ erDiagram
     DIM_EVENT_TYPES ||--o{ FACT_EVENTS : event_type
 ```
 
-### **Dimensions**
-1. **dim_date**  - Calendar dimension 2020-2030
-2. **dim_actors**  - GitHub users
-3. **dim_repos**  - Repositories
-4. **dim_event_types**  - Event taxonomy with auto-discovery
+### Dimensions
+1. **dim_date** — Calendar dimension 2010–2028, pre-generated
+2. **dim_actors** — GitHub users with Type 1 SCD and late-arriving data guard
+3. **dim_repos** — Repositories with owner/project parsed from `owner/repo` name format
+4. **dim_event_types** — Event taxonomy with auto-discovery and `is_curated` maintenance flag
 
-### **Fact Table**
-- **fact_events**  - GitHub events with FK references
+### Fact Table
+- **fact_events** — One row per GitHub event, FK-enforced references to all four dimensions
 
 ---
 
 ## 🛠️ Tech Stack
 
 | Category | Technology |
-|----------|-----------|
+|----------|------------|
 | **Language** | Python 3.10+ |
 | **Database** | PostgreSQL 16 |
 | **Data Model** | Kimball Star Schema |
-| **Architecture** | Medallion (Bronze/Silver/Gold) |
+| **Architecture** | Medallion (Bronze / Silver / Gold) |
+| **Containerization** | Docker + Docker Compose |
 | **Libraries** | psycopg2, requests, python-dotenv |
-| **Patterns** | Watermark-based incremental ETL, Type 1 SCD |
+| **Patterns** | Watermark incremental ETL, Type 1 SCD, Savepoint row isolation, Transactional ETL |
 
 ---
 
 ## 🚀 Quick Start
 
-### **1. Prerequisites**
+### 1. Prerequisites
 
 - Python 3.10+
 - PostgreSQL 16
-- GitHub account (optional, for higher API limits)
+- Docker + Docker Compose (optional, for containerized run)
+- GitHub account (optional — unauthenticated limit is 60 req/hr, authenticated is 5,000)
 
-### **2. Installation**
+### 2. Clone & Install
 
 ```bash
-# Clone repository
 git clone https://github.com/yourusername/github-pipeline.git
 cd github-pipeline
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-### **3. Configuration**
+### 3. Configure Environment
 
-Create `.env` file in project root:
+Copy the example and fill in your values:
+
+```bash
+cp .env.example .env
+```
 
 ```ini
+# .env
 DB_HOST=localhost
 DB_NAME=github_events
 DB_USER=postgres
 DB_PASS=your_secure_password
 DB_PORT=5432
-GITHUB_TOKEN=ghp_your_token_here  # Optional (5000 req/hr vs 60)
+GITHUB_TOKEN=ghp_your_token_here   # Optional but recommended
 ```
 
-### **4. Database Initialization**
+### 4. Initialize Database
+
+One command sets up all schemas and layers in the correct order:
 
 ```bash
-# Create schemas (Bronze, Silver, Gold)
 python setup_db.py
-
-# Create Gold star schema
-psql -U postgres -d github_events -f warehouse/gold/01_dim_date.sql
-psql -U postgres -d github_events -f warehouse/gold/02_dim_actors.sql
-psql -U postgres -d github_events -f warehouse/gold/03_dim_repos.sql
-psql -U postgres -d github_events -f warehouse/gold/04_dim_event_types.sql
-psql -U postgres -d github_events -f warehouse/gold/05_fact_events.sql
-
-# Create Silver view
-psql -U postgres -d github_events -f warehouse/silver/view_silver.sql
 ```
 
-### **5. Run Pipeline**
+This runs Bronze DDL → Silver DDL → Silver View → Gold dimensions → Gold fact table, respecting FK dependency order.
 
-**Two separate processes:**
+### 5. Run the Pipeline
 
-**Terminal 1: Bronze Ingestion (Continuous)**
+**Option A — Local (two terminals):**
+
 ```bash
+# Terminal 1: Bronze ingestion (continuous, every 60s)
 python ingestion/src/main.py
-
-# Output:
-# 🔵 BRONZE LAYER - CONTINUOUS INGESTION
-# Schedule: Every 60 seconds
-# ✅ Ingested 95 events in 1.23s
-# 💤 Next poll in 58 seconds...
 ```
 
-**Terminal 2: Silver + Gold ETL (Scheduled)**
 ```bash
+# Terminal 2: Silver + Gold ETL (scheduled)
 python ingestion/src/process_etl.py
+```
 
-# Output:
-# ⚪🟡 SILVER + GOLD ETL SCHEDULER
-# Mode: DEMO (2-min cycles)
-# [1/2] Silver Layer: Transforming Bronze → Silver...
-# ✅ Silver: Completed in 2.34s
-# [2/2] Gold Layer: Loading Star Schema...
-# ✅ Gold: Completed in 1.56s
+**Option B — Docker Compose (recommended):**
+
+```bash
+docker compose up --build
+```
+
+Both processes run as separate containers with shared log volume and secrets injected at runtime.
+
+### Sample Output
+
+```
+# Bronze listener
+2026-01-25 08:49:54 - ORCHESTRATOR - INFO - Pipeline started. Press Ctrl+C to stop.
+2026-01-25 08:49:55 - API_CLIENT - INFO - Authenticated! Limit: 5000 (Remaining: 4987)
+2026-01-25 08:49:55 - API_CLIENT - INFO - Successfully fetched 100 events.
+2026-01-25 08:49:55 - BRONZE_LOADER - INFO - Batch Report: 95 Inserted | 5 Duplicates | 0 Errors
+2026-01-25 08:49:55 - ORCHESTRATOR - INFO - Sleeping for 58 seconds...
+
+# ETL scheduler
+2026-01-25 08:50:00 - SILVER_GOLD_ETL_SCHEDULER - INFO - ETL RUN #1 - 08:50:00
+2026-01-25 08:50:00 - SILVER_GOLD_ETL_SCHEDULER - INFO - [1/2] Silver Layer...
+2026-01-25 08:50:01 - SILVER_JOB - INFO - Saved 95 events.
+2026-01-25 08:50:01 - SILVER_JOB - INFO - Silver Layer is fully up to date.
+2026-01-25 08:50:01 - SILVER_GOLD_ETL_SCHEDULER - INFO - Silver: Completed in 1.23s
+2026-01-25 08:50:01 - SILVER_GOLD_ETL_SCHEDULER - INFO - [2/2] Gold Layer...
+2026-01-25 08:50:02 - GOLD_ETL - INFO - [1/4] dim_actors: 87 rows | Duration: 45 ms
+2026-01-25 08:50:02 - GOLD_ETL - INFO - [2/4] dim_repos: 92 rows | Duration: 38 ms
+2026-01-25 08:50:02 - GOLD_ETL - INFO - [3/4] dim_event_types: 0 new types | Duration: 12 ms
+2026-01-25 08:50:02 - GOLD_ETL - INFO - [4/4] fact_events: 95 rows | Duration: 67 ms
+2026-01-25 08:50:02 - GOLD_ETL - INFO - COMMIT SUCCESSFUL: Gold Layer is up to date.
+2026-01-25 08:50:02 - SILVER_GOLD_ETL_SCHEDULER - INFO - Gold: Completed in 1.56s
+2026-01-25 08:50:02 - SILVER_GOLD_ETL_SCHEDULER - INFO - RUN #1 COMPLETE | Total Duration: 2.79s
 ```
 
 ---
 
 ## ⚙️ Configuration Modes
 
-### **Demo Mode (Default)** - For Testing/Portfolio
 ```python
 # ingestion/src/process_etl.py
-DEMO_MODE = True  # Runs every 2 minutes
-```
-
-### **Production Mode** - For Real Deployment
-```python
-# ingestion/src/process_etl.py
-DEMO_MODE = False  # Runs daily at 2:00 AM
+DEMO_MODE = True   # Every 2 minutes — for portfolio/demo
+DEMO_MODE = False  # Daily at 2:00 AM — for production
 ```
 
 ---
 
 ## 📊 Sample Analytics Queries
 
-### **Q1: Daily Event Volume (Last 7 Days)**
+### Q1: Daily Event Volume (Last 7 Days)
+
 ```sql
-SELECT 
+SELECT
     d.full_date,
-    COUNT(*) as total_events,
-    COUNT(DISTINCT f.actor_id) as unique_users,
-    COUNT(DISTINCT f.repo_id) as unique_repos
+    COUNT(*)                    AS total_events,
+    COUNT(DISTINCT f.actor_id)  AS unique_users,
+    COUNT(DISTINCT f.repo_id)   AS unique_repos
 FROM gold.fact_events f
 JOIN gold.dim_date d ON f.date_id = d.date_id
 WHERE d.full_date >= CURRENT_DATE - 7
@@ -324,34 +344,45 @@ GROUP BY d.full_date
 ORDER BY d.full_date;
 ```
 
-### **Q2: Top 10 Most Active Repositories (This Month)**
+### Q2: Top 10 Most Active Repositories (This Month)
+
 ```sql
-SELECT 
+SELECT
     r.repo_name,
     r.repo_owner,
-    COUNT(*) as total_events,
-    COUNT(DISTINCT f.actor_id) as contributors
+    COUNT(*)                   AS total_events,
+    COUNT(DISTINCT f.actor_id) AS contributors
 FROM gold.fact_events f
 JOIN gold.dim_repos r ON f.repo_id = r.repo_id
-JOIN gold.dim_date d ON f.date_id = d.date_id
-WHERE d.year = EXTRACT(YEAR FROM CURRENT_DATE)
+JOIN gold.dim_date d  ON f.date_id = d.date_id
+WHERE d.year  = EXTRACT(YEAR  FROM CURRENT_DATE)
   AND d.month = EXTRACT(MONTH FROM CURRENT_DATE)
 GROUP BY r.repo_name, r.repo_owner
 ORDER BY total_events DESC
 LIMIT 10;
 ```
 
-### **Q3: Hourly Activity Pattern (Weekday vs Weekend)**
+### Q3: Hourly Activity Pattern (Weekday vs Weekend)
+
 ```sql
-SELECT 
+SELECT
     f.event_hour,
     d.is_weekend,
-    COUNT(*) as events
+    COUNT(*) AS events
 FROM gold.fact_events f
 JOIN gold.dim_date d ON f.date_id = d.date_id
 WHERE d.full_date >= CURRENT_DATE - 30
 GROUP BY f.event_hour, d.is_weekend
 ORDER BY d.is_weekend, f.event_hour;
+```
+
+### Q4: Auto-Discovered Event Types Pending Review
+
+```sql
+SELECT event_type, discovered_at
+FROM gold.dim_event_types
+WHERE is_curated = FALSE
+ORDER BY discovered_at DESC;
 ```
 
 ---
@@ -362,22 +393,26 @@ ORDER BY d.is_weekend, f.event_hour;
 github-pipeline/
 ├── ingestion/
 │   ├── src/
-│   │   ├── main.py
-│   │   ├── process_etl.py
-│   │   ├── process_silver.py
-│   │   ├── process_gold.py
-│   │   ├── api_client.py
-│   │   ├── bronze_loader.py
-│   │   ├── config.py
-│   │   └── logger.py
+│   │   ├── main.py              # Bronze orchestrator (continuous loop)
+│   │   ├── process_etl.py       # Silver + Gold scheduler
+│   │   ├── process_silver.py    # Silver transformation logic
+│   │   ├── process_gold.py      # Gold ETL runner (executes SQL script)
+│   │   ├── api_client.py        # GitHub API client
+│   │   ├── bronze_loader.py     # Bronze insert with savepoints + DLQ
+│   │   ├── config.py            # Centralized config + validation
+│   │   └── logger.py            # Dual-output logger factory
 │   └── logs/
+│       ├── pipeline.log
+│       ├── bronze.log
+│       ├── silver.log
+│       └── silver_gold_etl.log
 │
 ├── warehouse/
 │   ├── bronze/
-│   │   └── ddl.sql
+│   │   └── ddl.sql              # raw_events + dead_letter_queue
 │   ├── silver/
-│   │   ├── ddl.sql
-│   │   └── view_silver.sql
+│   │   ├── ddl.sql              # silver.events + 7 indexes
+│   │   └── view_silver.sql      # Transformation view (type casting, sentinels, NULL filter)
 │   └── gold/
 │       ├── 01_dim_date.sql
 │       ├── 02_dim_actors.sql
@@ -385,44 +420,41 @@ github-pipeline/
 │       ├── 04_dim_event_types.sql
 │       ├── 05_fact_events.sql
 │       └── etl/
-│           └── master_gold_etl.sql
+│           └── master_gold_etl.sql   # Transactional ETL (BEGIN...COMMIT)
 │
 ├── data_samples/
 │   └── github_events_sample.json
+├── Dockerfile
+├── docker-compose.yml
+├── setup_db.py                  # One-command full database initialization
 ├── .env.example
 ├── .gitignore
+├── .dockerignore
 ├── requirements.txt
-├── setup_db.py
-├── LICENSE
 └── README.md
 ```
 
 ---
 
-## 🎯 Design Decisions & Learnings
+## 🎯 Design Decisions
 
-### **1. Why Two Separate Processes?**
-- **Bronze (continuous):** Captures events in real-time, minimizes data loss
-- **Silver + Gold (scheduled):** Batch processing is more efficient than row-by-row
+### Why Two Separate Processes?
+Bronze needs to run continuously to minimize data loss from GitHub's rolling event window. Silver + Gold are batch operations — running them on every Bronze insert would be wasteful and would complicate rollback boundaries. Separating them also means a Gold failure never takes down Bronze ingestion.
 
-### **2. Why Watermark Instead of Full Scans?**
-- Processes only new data (99% faster for incremental loads)
-- Scales to billions of rows
-- Industry standard (Snowflake, Databricks, BigQuery)
+### Why Watermark Instead of Full Scans?
+The anti-join pattern (`WHERE NOT EXISTS (SELECT 1 FROM silver.events s WHERE s.event_id = b.event_id)`) in Silver, and `WHERE processed_at > v_watermark` in Gold, means the pipeline only ever processes new data. Full table scans at scale would be untenable. This is the same pattern used in Snowflake, Databricks, and BigQuery incremental models.
 
-### **3. Why ORDER BY event_time Instead of processed_at?**
-- Prevents late-arriving old data from overwriting current data
-- Example: Event from yesterday arrives today → Should not overwrite current dimension values
+### Why `ORDER BY event_time DESC` in Dimension Upserts?
+When loading dimensions, `DISTINCT ON (actor_id) ... ORDER BY actor_id, event_time DESC` picks the most recent record per actor in a single pass. The conditional update `WHERE dim_actors.last_event_time < EXCLUDED.last_event_time` then ensures late-arriving old events cannot overwrite a dimension row that already has more current data.
 
-### **4. Why Transactional ETL (BEGIN...COMMIT)?**
-- All-or-nothing: If Gold fails, dimensions roll back automatically
-- No partial failures, no silent data loss
-- Watermark unchanged on failure → Auto-retry next run
+### Why Transactional ETL with `BEGIN...COMMIT`?
+If `dim_repos` loads successfully but `fact_events` fails, the whole transaction rolls back automatically. The watermark stays at the previous value, so the next scheduled run retries from exactly the right point. There are no partial states to clean up.
 
-### **5. Why Sentinel Values Instead of NULLs?**
-- FK constraints require valid references
-- -1 actor_id → "unknownuser" dimension row
-- Enables pipeline to continue vs crashing on bad data
+### Why Sentinel Values Instead of NULLs?
+FK constraints on `fact_events` require every `actor_id` and `repo_id` to reference a real dimension row. NULLs would require nullable FKs, which weakens referential integrity. Sentinel rows (`-1, 'unknownuser'`) satisfy the constraint while flagging the bad data — the pipeline keeps running and the problem is visible in `fact_events WHERE actor_id = -1`.
+
+### Why Savepoints Instead of Rollback in Bronze?
+`conn.rollback()` rolls back the entire open transaction, not just the failed row. Using `SAVEPOINT` / `ROLLBACK TO SAVEPOINT` creates a named checkpoint inside the transaction so only the failing row is undone while all preceding successful inserts remain intact and committed.
 
 ---
 
@@ -430,78 +462,91 @@ github-pipeline/
 
 | Metric | Value |
 |--------|-------|
-| **Bronze ingestion** | ~100 events/minute |
-| **Silver batch size** | 5,000 rows |
-| **Gold ETL duration** | ~3 seconds (1,000 events) |
-| **Storage** | ~500 MB per 1M events (JSONB) |
-| **Indexes** | 7 (Silver), 9 (Gold) for query performance |
+| **Bronze ingestion** | ~100 events / 60-second cycle |
+| **Silver batch size** | 5,000 rows per batch |
+| **Gold ETL duration** | ~3 seconds per 1,000 events |
+| **Storage estimate** | ~500 MB per 1M events (JSONB) |
+| **Indexes** | 7 (Silver), 9 (Gold) |
 
 ---
 
 ## 🔍 Monitoring & Observability
 
-### **Log Files**
+### Log Files
+
 ```
 ingestion/logs/
-├── pipeline.log
-├── bronze.log
-├── silver.log
-└── silver_gold_etl.log
+├── pipeline.log          # Orchestrator + Silver job summary
+├── bronze.log            # Bronze insert reports
+├── silver.log            # Silver row-level detail (file only, no console noise)
+└── silver_gold_etl.log   # ETL scheduler run summaries
 ```
 
-### **Health Checks**
+### Health Check Queries
+
 ```sql
+-- How fresh is the Gold layer?
 SELECT MAX(silver_processed_at) FROM gold.fact_events;
 
+-- How many Bronze rows haven't been Silver-processed yet?
 SELECT COUNT(*) FROM bronze.raw_events b
 WHERE NOT EXISTS (SELECT 1 FROM silver.events s WHERE s.event_id = b.event_id);
 
-SELECT COUNT(*) FROM gold.fact_events WHERE actor_id = -1;
-SELECT COUNT(*) FROM gold.fact_events WHERE repo_id = -1;
+-- How much bad data reached Gold via sentinel routing?
+SELECT COUNT(*) AS unknown_actors FROM gold.fact_events WHERE actor_id = -1;
+SELECT COUNT(*) AS unknown_repos  FROM gold.fact_events WHERE repo_id  = -1;
+
+-- Any new event types waiting for manual curation?
+SELECT event_type, discovered_at FROM gold.dim_event_types
+WHERE is_curated = FALSE ORDER BY discovered_at DESC;
 ```
 
 ---
 
 ## 🚧 Roadmap
 
-### **Completed ✅**
-- [x] Bronze layer (raw JSONB storage + DLQ)
-- [x] Silver layer (incremental transformations)
-- [x] Gold layer (star schema with 4 dimensions)
+### Completed ✅
+- [x] Bronze layer — raw JSONB storage + Dead Letter Queue + row-level savepoints
+- [x] Silver layer — incremental transformation, type casting, NULL filtering
+- [x] Gold layer — Kimball star schema with 4 dimensions + fact table
 - [x] Watermark-based incremental loading
-- [x] Transactional ETL (all-or-nothing)
-- [x] Late-arriving data protection
-- [x] Demo vs Production modes
+- [x] Transactional ETL (all-or-nothing with automatic rollback)
+- [x] Late-arriving data protection on all dimension upserts
+- [x] Auto-discovery of unknown event types
+- [x] Dockerized deployment (two containers, non-root user)
+- [x] Graceful shutdown on SIGINT/SIGTERM
+- [x] One-command database setup
 
-### **Next Steps 🎯**
-- [ ] Apache Airflow orchestration (DAGs for scheduling)
-- [ ] AWS deployment (EC2 + RDS)
-- [ ] Data quality tests (Great Expectations)
-- [ ] Dashboard/BI integration (Metabase/Tableau)
+### Next Steps 🎯
+- [ ] Apache Airflow orchestration (replace custom scheduler with DAGs)
+- [ ] AWS deployment (EC2 + RDS + CloudWatch)
+- [ ] Data quality test suite (pytest + scheduled checks)
+- [ ] Dashboard / BI integration (Metabase or Tableau)
 - [ ] CI/CD pipeline (GitHub Actions)
 
 ---
 
-## 📚 Learning Resources
+## 📚 Patterns & References
 
-This project implements patterns from:
-- **Kimball's Data Warehouse Toolkit** (dimensional modeling)
-- **Databricks Medallion Architecture** (Bronze/Silver/Gold)
-- **Snowflake Best Practices** (watermark-based loading)
-- **Enterprise ETL Patterns** (transactional, idempotent operations)
+This project implements concepts from:
+
+- **Kimball's Data Warehouse Toolkit** — dimensional modeling, star schema, Type 1 SCD
+- **Databricks Medallion Architecture** — Bronze / Silver / Gold layering
+- **Snowflake Best Practices** — watermark-based incremental loading
+- **PostgreSQL Documentation** — savepoints, `DISTINCT ON`, conditional upserts, `RAISE NOTICE`
 
 ---
 
 ## 📝 License
 
-MIT License - see [LICENSE](LICENSE) file for details
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
 ## 👤 Author
 
-**Ragesh**
+**Ragesh** — self-taught data engineer, second project.
 
 ---
 
-**⭐ If you found this project helpful, please consider giving it a star!**
+⭐ If this project was useful or interesting, a star is appreciated!
