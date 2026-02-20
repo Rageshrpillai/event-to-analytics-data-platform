@@ -27,12 +27,13 @@ The pipeline uses a **Stateless Sliding Window** for ingestion and a **Watermark
 ### Medallion Pattern (Bronze → Silver → Gold)
 
 ```mermaid
+%%{init: { 'flowchart': { 'nodeSpacing': 100, 'rankSpacing': 150, 'subgraphPadding': 40 } } }%%
 graph TD
     %% External Source
     GitHub["🌐 <b>GitHub Events API</b><br/>/events · REST JSON<br/>100 events/req"]
 
     %% Ingestion Container
-    subgraph C1 ["🐳 Container 1: bronze-listener (Continuous 60s)"]
+    subgraph C1 ["Docker Container 1: bronze-listener (Continuous 60s)"]
         direction TB
         Orch["<b>Orchestrator</b><br/>main.py"]
         Fetcher["<b>API Client</b><br/>api_client.py"]
@@ -59,7 +60,7 @@ graph TD
     end
 
     %% ETL Container
-    subgraph C2 ["🐳 Container 2: silver-gold-etl (Scheduled)"]
+    subgraph C2 ["Docker Container 2: silver-gold-etl (Scheduled)"]
         direction TB
         SilverProc["<b>Silver Processor</b><br/>process_silver.py<br/>Anti-join watermark<br/>5000 rows/batch"]
         GoldProc["<b>Gold ETL Runner</b><br/>process_gold.py<br/>BEGIN … COMMIT<br/>Auto-rollback"]
