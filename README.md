@@ -483,18 +483,6 @@ FK constraints on `fact_events` require every `actor_id` and `repo_id` to refere
 
 ---
 
-## 📈 Performance Metrics
-
-| Metric | Value |
-|--------|-------|
-| **Bronze ingestion** | ~100 events / 60-second cycle |
-| **Silver batch size** | 5,000 rows per batch |
-| **Gold ETL duration** | ~3 seconds per 1,000 events |
-| **Storage estimate** | ~500 MB per 1M events (JSONB) |
-| **Indexes** | 7 (Silver), 9 (Gold) |
-
----
-
 ## 🔍 Monitoring & Observability
 
 ### Log Files
