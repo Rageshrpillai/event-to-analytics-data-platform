@@ -28,46 +28,71 @@ The pipeline uses a **Stateless Sliding Window** for ingestion and a **Watermark
 
 ```mermaid
 graph TD
-    GitHub[GitHub API <br/> /events]
+    %% External Source
+    GitHub["🌐 <b>GitHub Events API</b><br/>/events · REST JSON<br/>100 events/req"]
 
-    subgraph Ingestion_Layer [Python Ingestion Layer]
-        Orch[Orchestrator <br/> main.py]
-        Fetcher[API Client]
-        Loader[Bronze Loader]
+    %% Ingestion Container
+    subgraph C1 ["🐳 Container 1: bronze-listener (Continuous 60s)"]
+        direction TB
+        Orch["<b>Orchestrator</b><br/>main.py"]
+        Fetcher["<b>API Client</b><br/>api_client.py"]
+        Loader["<b>Bronze Loader</b><br/>bronze_loader.py<br/>Row-level SAVEPOINTs"]
+        
+        Orch -->|"Trigger 60s"| Fetcher
+        Fetcher -->|"List of Events"| Loader
     end
 
-    subgraph Storage_Layer [PostgreSQL Warehouse]
-        Bronze[(Bronze Layer <br/> raw_events)]
-        DLQ[(Dead Letter Queue <br/> bad_data)]
-        Silver[(Silver Layer <br/> events)]
-        Gold[(Gold Layer <br/> Star Schema)]
+    %% Database Layer
+    subgraph PG ["🗄 PostgreSQL 16 — Data Warehouse"]
+        direction TB
+        Bronze[("<b>Bronze Layer</b><br/>bronze.raw_events<br/>Raw JSONB · Append-only")]
+        DLQ[("⚠ <b>Dead Letter Queue</b><br/>bronze.dead_letter_queue<br/>Failed rows isolated")]
+        
+        Silver[("<b>Silver Layer</b><br/>silver.events<br/>Cleaned · 7 Indexes")]
+        
+        SilverV{{"<b>silver.v_events</b> (VIEW)<br/>Safe BIGINT cast · Sentinel routing<br/>NULL filter · date_id derivation"}}
+        
+        Gold[("<b>Gold Layer</b> · Star Schema<br/>dim_date · dim_actors · dim_repos<br/>dim_event_types · fact_events")]
+
+        %% Internal Relationship
+        Silver -.-> SilverV
     end
 
-    subgraph ETL_Layer [Python ETL Scheduler]
-        Scheduler[process_etl.py]
-        SilverProc[Silver Processor]
-        GoldProc[Gold Processor]
+    %% ETL Container
+    subgraph C2 ["🐳 Container 2: silver-gold-etl (Scheduled)"]
+        direction TB
+        SilverProc["<b>Silver Processor</b><br/>process_silver.py<br/>Anti-join watermark<br/>5000 rows/batch"]
+        GoldProc["<b>Gold ETL Runner</b><br/>process_gold.py<br/>BEGIN … COMMIT<br/>Auto-rollback"]
     end
 
-    Orch -->|Trigger 60s| Fetcher
-    GitHub -.->|JSON Stream| Fetcher
-    Fetcher -.->|List of Events| Loader
+    %% Final Destination
+    BI["📊 <b>BI & Analytics</b><br/>Metabase · SQL Queries"]
 
-    Loader -->|Raw JSONB| Bronze
-    Loader -.->|Failed Rows| DLQ
+    %% Connections
+    GitHub ==>|"JSON Stream"| Fetcher
+    Loader -->|"Raw JSONB"| Bronze
+    Loader -.->|"Failed Rows"| DLQ
 
-    Scheduler -->|Trigger| SilverProc
-    SilverProc -->|Read New| Bronze
-    SilverProc -->|Cleaned Data| Silver
+    Bronze -->|"Anti-join:<br/>WHERE NOT EXISTS"| SilverProc
+    SilverProc -->|"Cleaned Data"| Silver
+    
+    SilverV -->|"WHERE processed_at<br/>> watermark"| GoldProc
+    GoldProc -->|"Transactional Load<br/>All-or-nothing"| Gold
 
-    Scheduler -->|Trigger| GoldProc
-    GoldProc -->|Read| Silver
-    GoldProc -->|Update Dims & Facts| Gold
+    Gold ==>|"Star Schema"| BI
 
-    classDef storage fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef process fill:#fff3e0,stroke:#ff6f00,stroke-width:2px;
-    class Bronze,DLQ,Silver,Gold storage;
-    class Fetcher,Loader,SilverProc,GoldProc,Orch,Scheduler process;
+    %% Styling
+    classDef container fill:#1a2233,stroke:#3b82f6,stroke-width:2px,color:#ffffff;
+    classDef storage fill:#1e1e1e,stroke:#f59e0b,stroke-width:2px,color:#fcd34d;
+    classDef view fill:#121a12,stroke:#10b981,stroke-width:2px,color:#6ee7b7;
+    classDef external fill:#2d3748,stroke:#cbd5e1,stroke-width:2px,color:#ffffff;
+    classDef dlq fill:#2d1a1a,stroke:#ef4444,stroke-width:2px,color:#fca5a5;
+
+    class C1,C2 container;
+    class Bronze,Silver,Gold storage;
+    class SilverV view;
+    class GitHub,BI external;
+    class DLQ dlq;
 ```
 
 ### Data Flow
