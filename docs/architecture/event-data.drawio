@@ -1,0 +1,405 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.0 Chrome/140.0.7339.249 Electron/38.7.2 Safari/537.36" version="29.3.0">
+  <diagram name="GitHub Events Pipeline" id="github-events-pipeline">
+    <mxGraphModel dx="2535" dy="1500" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1900" pageHeight="1200" background="#000000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=13;fontStyle=1;fontColor=#FFFFFF;letterSpacing=2;" value="HIGH LEVEL ARCHITECTURE — GITHUB EVENTS DATA PIPELINE" vertex="1">
+          <mxGeometry height="34" width="1480" x="50" y="-10" as="geometry" />
+        </mxCell>
+        <mxCell id="src-panel" parent="1" style="swimlane;startSize=22;fillColor=#1c1c1c;strokeColor=#555555;fontColor=#FFFFFF;fontSize=8;fontStyle=1;letterSpacing=3;rounded=1;arcSize=6;strokeWidth=1.5;" value="SOURCE" vertex="1">
+          <mxGeometry height="302" width="160" x="-69" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="src-circle" parent="src-panel" style="ellipse;fillColor=#0d2233;strokeColor=#38bdf8;strokeWidth=1.5;fontSize=12;fontStyle=1;fontColor=#38bdf8;verticalAlign=middle;" value="GitHub" vertex="1">
+          <mxGeometry height="80" width="80" x="40" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="src-name" parent="src-panel" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#FFFFFF;" value="GitHub Events API" vertex="1">
+          <mxGeometry height="22" width="150" x="5" y="112" as="geometry" />
+        </mxCell>
+        <mxCell id="src-badge" parent="src-panel" style="rounded=1;arcSize=20;fillColor=#0d2233;strokeColor=#1d4a6a;fontSize=9;fontStyle=1;fontColor=#38bdf8;" value="REST · JSON" vertex="1">
+          <mxGeometry height="22" width="100" x="31" y="139" as="geometry" />
+        </mxCell>
+        <mxCell id="src-meta" parent="src-panel" style="text;html=0;strokeColor=#2a3a4a;fillColor=none;align=left;verticalAlign=top;fontSize=8;fontColor=#FFFFFF;spacingLeft=8;spacingTop=6;whiteSpace=pre;" value="Object Type: JSON&#xa;Interface: API Calls&#xa;Batch Size: 100 events&#xa;Rate Limit: 5000/hr (auth)" vertex="1">
+          <mxGeometry height="72" width="148" x="7" y="188" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-src-c1" edge="1" parent="1" source="src-panel" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#38bdf8;strokeWidth=1.5;fontColor=#38bdf8;fontSize=8;labelBackgroundColor=#141414;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;endFill=1;flowAnimation=1;" target="c1-panel" value="100 events / call">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-panel" parent="1" style="swimlane;startSize=26;fillColor=#0c1628;strokeColor=#3b82f6;fontColor=#FFFFFF;fontSize=7;fontStyle=1;rounded=1;arcSize=5;strokeWidth=1.5;" value="Container 1 - Bronze Listener  (continuous · 60s loop)" vertex="1">
+          <mxGeometry height="300" width="210" x="186" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-orch-bg" parent="c1-panel" style="rounded=1;arcSize=10;fillColor=#111d35;strokeColor=#2d4a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="64" width="180" x="10" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-orch-t" parent="c1-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;fontColor=#93c5fd;spacingLeft=10;" value="Orchestrator  (main.py)" vertex="1">
+          <mxGeometry height="22" width="180" x="10" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-orch-d" parent="c1-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontColor=#FFFFFF;spacingLeft=10;whiteSpace=wrap;fontStyle=1" value="Continuous 60s loop · SIGINT / SIGTERM graceful shutdown" vertex="1">
+          <mxGeometry height="40" width="180" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-sep1" parent="c1-panel" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontColor=#3b5a8a;" value="↓" vertex="1">
+          <mxGeometry height="20" width="36" x="82" y="104" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-api-bg" parent="c1-panel" style="rounded=1;arcSize=10;fillColor=#111d35;strokeColor=#2d4a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="64" width="180" x="10" y="126" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-api-t" parent="c1-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;fontColor=#93c5fd;spacingLeft=10;" value="API Client  (api_client.py)" vertex="1">
+          <mxGeometry height="22" width="180" x="10" y="126" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-api-d" parent="c1-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontColor=#FFFFFF;spacingLeft=10;whiteSpace=wrap;" value="fetch_events() · Auth header · Rate-limit logging" vertex="1">
+          <mxGeometry height="40" width="180" x="10" y="146" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-sep2" parent="c1-panel" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontColor=#3b5a8a;" value="↓" vertex="1">
+          <mxGeometry height="20" width="36" x="82" y="192" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-loader-bg" parent="c1-panel" style="rounded=1;arcSize=10;fillColor=#111d35;strokeColor=#2d4a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="70" width="180" x="10" y="214" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-loader-t" parent="c1-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;fontColor=#93c5fd;spacingLeft=10;" value="Bronze Loader  (bronze_loader.py)" vertex="1">
+          <mxGeometry height="22" width="180" x="10" y="214" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-loader-d" parent="c1-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontColor=#FFFFFF;spacingLeft=10;whiteSpace=wrap;" value="SAVEPOINT per row · ON CONFLICT DO NOTHING · failed rows → DLQ" vertex="1">
+          <mxGeometry height="46" width="180" x="10" y="234" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-c1-dw" edge="1" parent="1" source="c1-panel" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#fb923c;strokeWidth=1.5;fontColor=#fb923c;fontSize=8;labelBackgroundColor=#141414;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;endFill=1;flowAnimation=1;" value="Raw JSONB">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="521" y="242" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dw-panel" parent="1" style="swimlane;startSize=26;fillColor=#191919;strokeColor=#3a3a3a;fontColor=#FFFFFF;fontSize=9;fontStyle=1;letterSpacing=2;rounded=1;arcSize=4;strokeWidth=1.5;" value="Data Warehouse — PostgreSQL 16" vertex="1">
+          <mxGeometry height="346" width="600" x="510" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bronze-layer" parent="dw-panel" style="swimlane;startSize=26;fillColor=#1e0e04;strokeColor=#c07030;fontColor=#fb923c;fontSize=8;fontStyle=1;letterSpacing=2;rounded=1;arcSize=8;strokeWidth=1.5;" value="BRONZE LAYER" vertex="1">
+          <mxGeometry height="284" width="178" x="10" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="dlq-box" parent="bronze-layer" style="rounded=1;arcSize=8;fillColor=#2d1010;strokeColor=#ef4444;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="46" width="162" x="8" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="dlq-t" parent="bronze-layer" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#ef4444;spacingLeft=8;" value="Dead Letter Queue" vertex="1">
+          <mxGeometry height="20" width="162" x="8" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="dlq-d" parent="bronze-layer" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=7;fontColor=#D5E8D4;spacingLeft=8;whiteSpace=wrap;" value="bronze.dead_letter_queue · failed rows isolated" vertex="1">
+          <mxGeometry height="24" width="162" x="4" y="194" as="geometry" />
+        </mxCell>
+        <mxCell id="bronze-footer" parent="bronze-layer" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=7;fontStyle=2;fontColor=#A85A18;" value="No Transformation · Source of Truth" vertex="1">
+          <mxGeometry height="16" width="170" x="4" y="244" as="geometry" />
+        </mxCell>
+        <mxCell id="silver-layer" parent="dw-panel" style="swimlane;startSize=26;fillColor=none;strokeColor=none;fontColor=#cbd5e1;fontSize=8;fontStyle=1;letterSpacing=2;rounded=1;arcSize=8;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="310" width="398" x="202" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="view-box" parent="silver-layer" style="rounded=1;arcSize=8;fillColor=#0e2218;strokeColor=#10b981;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="172" x="4" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="view-t" parent="silver-layer" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#10b981;spacingLeft=8;" value="silver.v_events  (VIEW)" vertex="1">
+          <mxGeometry height="20" width="172" x="4" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="view-d" parent="silver-layer" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=7;fontColor=#D5E8D4;spacingLeft=8;whiteSpace=wrap;" value="Safe BIGINT cast · Sentinel routing · NULL event_time filter · date_id derivation" vertex="1">
+          <mxGeometry height="34" width="172" x="4" y="192" as="geometry" />
+        </mxCell>
+        <mxCell id="silver-footer" parent="silver-layer" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=7;fontStyle=2;fontColor=#A7B3CF;" value="Incremental · Watermark-based · Anti-join" vertex="1">
+          <mxGeometry height="16" width="180" y="244" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-2" parent="silver-layer" style="swimlane;startSize=26;fontSize=9;fontStyle=1;letterSpacing=2;rounded=1;arcSize=4;strokeWidth=1.5;fillColor=#647687;" value="Data Warehouse - PostgreSQL 16" vertex="1">
+          <mxGeometry height="346" width="600" x="-202" y="-36" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-3" parent="ZqDuB59zU2ASQcCFy2xq-2" style="swimlane;startSize=26;fillColor=#1e0e04;strokeColor=#c07030;fontColor=#fb923c;fontSize=8;fontStyle=1;letterSpacing=2;rounded=1;arcSize=8;strokeWidth=1.5;" value="BRONZE LAYER" vertex="1">
+          <mxGeometry height="284" width="178" x="10" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-6" parent="ZqDuB59zU2ASQcCFy2xq-3" style="rounded=1;arcSize=8;fillColor=#2d1010;strokeColor=#ef4444;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="46" width="162" x="8" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-7" parent="ZqDuB59zU2ASQcCFy2xq-3" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#ef4444;spacingLeft=8;" value="Dead Letter Queue" vertex="1">
+          <mxGeometry height="20" width="162" x="8" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-8" parent="ZqDuB59zU2ASQcCFy2xq-3" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=7;fontColor=#D5E8D4;spacingLeft=8;whiteSpace=wrap;" value="bronze.dead_letter_queue · failed rows isolated" vertex="1">
+          <mxGeometry height="24" width="162" x="4" y="194" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-9" parent="ZqDuB59zU2ASQcCFy2xq-3" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=7;fontStyle=2;fontColor=#A85A18;" value="No Transformation · Source of Truth" vertex="1">
+          <mxGeometry height="16" width="170" x="4" y="244" as="geometry" />
+        </mxCell>
+        <mxCell id="bronze-pts" parent="ZqDuB59zU2ASQcCFy2xq-3" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=8;fontColor=#FFFFFF;spacingLeft=8;spacingTop=4;whiteSpace=pre;" value="Raw JSONB · Append-only · Immutable&#xa;ON CONFLICT DO NOTHING &#xa;Row-level SAVEPOINTs" vertex="1">
+          <mxGeometry height="56" width="170" x="4" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="bronze-cyl" parent="ZqDuB59zU2ASQcCFy2xq-3" style="shape=mxgraph.flowchart.database;fillColor=#7a3818;strokeColor=#d07030;strokeWidth=1.5;fontSize=8;fontColor=#d07030;verticalAlign=bottom;" value="bronze.raw_events" vertex="1">
+          <mxGeometry height="60" width="90" x="44" y="44" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-10" parent="ZqDuB59zU2ASQcCFy2xq-2" style="swimlane;startSize=26;fillColor=#18191e;strokeColor=#7a8090;fontColor=#cbd5e1;fontSize=8;fontStyle=1;letterSpacing=2;rounded=1;arcSize=8;strokeWidth=1.5;" value="SILVER LAYER" vertex="1">
+          <mxGeometry height="284" width="188" x="202" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-13" parent="ZqDuB59zU2ASQcCFy2xq-10" style="rounded=1;arcSize=8;fillColor=#0e2218;strokeColor=#10b981;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="172" x="4" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-14" parent="ZqDuB59zU2ASQcCFy2xq-10" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#10b981;spacingLeft=8;" value="silver.v_events  (VIEW)" vertex="1">
+          <mxGeometry height="20" width="172" x="4" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-15" parent="ZqDuB59zU2ASQcCFy2xq-10" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=7;fontColor=#D5E8D4;spacingLeft=8;whiteSpace=wrap;" value="Safe BIGINT cast · Sentinel routing · NULL event_time filter · date_id derivation" vertex="1">
+          <mxGeometry height="34" width="172" x="4" y="192" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-16" parent="ZqDuB59zU2ASQcCFy2xq-10" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=7;fontStyle=2;fontColor=#A7B3CF;" value="Incremental · Watermark-based · Anti-join" vertex="1">
+          <mxGeometry height="16" width="180" y="244" as="geometry" />
+        </mxCell>
+        <mxCell id="silver-pts" parent="ZqDuB59zU2ASQcCFy2xq-10" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=8;fontColor=#FFFFFF;spacingLeft=8;spacingTop=4;whiteSpace=pre;" value="Cleaned and typed data · 7 indexes&#xa;Type casting · Sentinel values (-1)&#xa;Watermark: processed_at timestamp" vertex="1">
+          <mxGeometry height="48" width="180" x="8" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="silver-cyl" parent="ZqDuB59zU2ASQcCFy2xq-10" style="shape=mxgraph.flowchart.database;fillColor=#484e56;strokeColor=#9aa0a8;strokeWidth=1.5;fontSize=8;fontColor=#9aa0a8;verticalAlign=bottom;" value="silver.events" vertex="1">
+          <mxGeometry height="60" width="90" x="49" y="44" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-17" parent="ZqDuB59zU2ASQcCFy2xq-2" style="swimlane;startSize=26;fillColor=#1a1500;strokeColor=#c8a020;fontColor=#fbbf24;fontSize=8;fontStyle=1;letterSpacing=2;rounded=1;arcSize=8;strokeWidth=1.5;" value="GOLD LAYER" vertex="1">
+          <mxGeometry height="284" width="186" x="404" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="gold-layer" parent="dw-panel" style="swimlane;startSize=26;fillColor=#1a1500;strokeColor=#c8a020;fontColor=#fbbf24;fontSize=8;fontStyle=1;letterSpacing=2;rounded=1;arcSize=8;strokeWidth=1.5;" value="GOLD LAYER" vertex="1">
+          <mxGeometry height="284" width="186" x="404" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="gold-footer" parent="gold-layer" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=7;fontStyle=2;fontColor=#AA7500;" value="Transactional · All-or-nothing · Idempotent" vertex="1">
+          <mxGeometry height="16" width="178" x="4" y="244" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-20" parent="gold-layer" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=8;fontColor=default;spacingLeft=8;spacingTop=2;whiteSpace=pre;" value="FK-enforced refs to all 4 dims&#xa;Sentinel rows: -1 actor  -1 repo&#xa;Auto-discovery: new event types" vertex="1">
+          <mxGeometry height="48" width="178" x="4" y="176" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-19" parent="gold-layer" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=8;fontColor=#FFFFFF;spacingLeft=8;spacingTop=4;whiteSpace=pre;" value="Star Schema · Kimball · Type 1 SCD&#xa;4 Dims + 1 Fact table&#xa;dim_date · dim_actors · dim_repos&#xa;dim_event_types · fact_events" vertex="1">
+          <mxGeometry height="72" width="178" x="8" y="104" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-18" parent="gold-layer" style="shape=mxgraph.flowchart.database;fillColor=#706008;strokeColor=#d8b028;strokeWidth=1.5;fontSize=8;fontColor=#d8b028;verticalAlign=bottom;" value="gold.fact_events" vertex="1">
+          <mxGeometry height="60" width="90" x="48" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="arr-dw-out" edge="1" parent="1" source="dw-panel" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#FFD966;strokeWidth=1.5;fontColor=#fb923c;fontSize=8;labelBackgroundColor=#141414;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;endFill=1;flowAnimation=1;" target="consume-panel" value="Star Schema">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="consume-panel" parent="1" style="swimlane;startSize=22;fillColor=#0c1c16;strokeColor=#34d399;fontColor=#34d399;fontSize=8;fontStyle=1;letterSpacing=3;rounded=1;arcSize=6;strokeWidth=1.5;" value="CONSUME" vertex="1">
+          <mxGeometry height="344.5" width="168" x="1225" y="60.75" as="geometry" />
+        </mxCell>
+        <mxCell id="cons-bi-t" parent="consume-panel" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;fontColor=#FFFFFF;" value="BI and Reporting" vertex="1">
+          <mxGeometry height="20" width="158" x="10" y="97" as="geometry" />
+        </mxCell>
+        <mxCell id="cons-bi-d" parent="consume-panel" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=8;fontColor=#FFFFFF;" value="Metabase · SQL Queries" vertex="1">
+          <mxGeometry height="16" width="158" x="10" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="cons-an-t" parent="consume-panel" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;fontColor=#FFFFFF;" value="Analytics" vertex="1">
+          <mxGeometry height="20" width="158" x="5" y="197" as="geometry" />
+        </mxCell>
+        <mxCell id="cons-an-d" parent="consume-panel" style="text;html=0;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=8;fontColor=#FFFFFF;whiteSpace=wrap;" value="Event trends · Top repos · Patterns&#xa;Hourly activity · Weekend vs weekday" vertex="1">
+          <mxGeometry height="30" width="158" x="5" y="217" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-panel" parent="1" style="swimlane;startSize=26;fillColor=#100e1c;strokeColor=#7c3aed;fontColor=#a78bfa;fontSize=9;fontStyle=1;rounded=1;arcSize=4;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="310" width="820" x="490" y="614" as="geometry">
+            <mxRectangle height="26" width="230" x="500" y="460" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c2-sched-bg" parent="c2-panel" style="rounded=1;arcSize=6;fillColor=#160f2a;strokeColor=#5b21b6;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="254" width="188" x="10" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-hdr" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#a78bfa;letterSpacing=1;spacingLeft=8;" value="SCHEDULER  (process_etl.py)" vertex="1">
+          <mxGeometry height="20" width="188" x="10" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-div" parent="c2-panel" style="line;strokeColor=#3a2a6a;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="6" width="172" x="18" y="56" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-b1" parent="c2-panel" style="rounded=1;arcSize=10;fillColor=#1c1030;strokeColor=#4a2a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="172" x="18" y="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-b1-t" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#c4b5fd;spacingLeft=8;" value="Run Order" vertex="1">
+          <mxGeometry height="18" width="172" x="18" y="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-b1-d" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=7;fontColor=#FFFFFF;spacingLeft=8;spacingTop=2;whiteSpace=wrap;" value="Silver first , Gold only if Silver succeeds · Re-raises exceptions" vertex="1">
+          <mxGeometry height="36" width="172" x="18" y="82" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-b2" parent="c2-panel" style="rounded=1;arcSize=10;fillColor=#1c1030;strokeColor=#4a2a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="172" x="18" y="132" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-b2-t" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#c4b5fd;spacingLeft=8;" value="Schedule Modes" vertex="1">
+          <mxGeometry height="18" width="172" x="18" y="132" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-b2-d" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=7;fontColor=#FFFFFF;spacingLeft=8;spacingTop=2;whiteSpace=pre;" value="DEMO_MODE=True: every 2 min&#xa;DEMO_MODE=False: daily 2:00 AM" vertex="1">
+          <mxGeometry height="36" width="172" x="18" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-b3" parent="c2-panel" style="rounded=1;arcSize=10;fillColor=#1c1030;strokeColor=#4a2a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="172" x="18" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-b3-t" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#c4b5fd;spacingLeft=8;" value="Reliability" vertex="1">
+          <mxGeometry height="18" width="172" x="18" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sched-b3-d" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=7;fontColor=#FFFFFF;spacingLeft=8;spacingTop=2;whiteSpace=wrap;" value="SIGINT / SIGTERM graceful shutdown · Structured logging · run counter" vertex="1">
+          <mxGeometry height="36" width="172" x="18" y="214" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-vd1" parent="c2-panel" style="line;strokeColor=#2a1e50;fillColor=none;horizontal=0;" value="" vertex="1">
+          <mxGeometry height="254" width="8" x="206" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-bg" parent="c2-panel" style="rounded=1;arcSize=6;fillColor=#160f2a;strokeColor=#5b21b6;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="254" width="278" x="218" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-hdr" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#a78bfa;letterSpacing=1;spacingLeft=8;" value="SILVER ETL  (process_silver.py)" vertex="1">
+          <mxGeometry height="20" width="278" x="218" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-div" parent="c2-panel" style="line;strokeColor=#3a2a6a;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="6" width="262" x="226" y="56" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-b1" parent="c2-panel" style="rounded=1;arcSize=10;fillColor=#1c1030;strokeColor=#4a2a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="262" x="226" y="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-b1-t" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#c4b5fd;spacingLeft=8;" value="Incremental Load  (reads Bronze)" vertex="1">
+          <mxGeometry height="18" width="262" x="226" y="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-b1-d" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=7;fontColor=#FFFFFF;spacingLeft=8;spacingTop=2;whiteSpace=wrap;" value="WHERE NOT EXISTS (SELECT 1 FROM silver.events WHERE event_id = b.event_id) · 5 000 rows / batch" vertex="1">
+          <mxGeometry height="36" width="262" x="226" y="82" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-b2" parent="c2-panel" style="rounded=1;arcSize=10;fillColor=#1c1030;strokeColor=#4a2a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="262" x="226" y="132" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-b2-t" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#c4b5fd;spacingLeft=8;" value="Transformation  (writes Silver)" vertex="1">
+          <mxGeometry height="18" width="262" x="226" y="132" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-b2-d" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=7;fontColor=#FFFFFF;spacingLeft=8;spacingTop=2;whiteSpace=wrap;" value="extract_event() · Parse / Cast / Validate · INSERT INTO silver.events ON CONFLICT DO NOTHING" vertex="1">
+          <mxGeometry height="36" width="262" x="226" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-b3" parent="c2-panel" style="rounded=1;arcSize=10;fillColor=#1c1030;strokeColor=#4a2a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="262" x="226" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-b3-t" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#c4b5fd;spacingLeft=8;" value="Error Handling" vertex="1">
+          <mxGeometry height="18" width="262" x="226" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-sil-b3-d" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=7;fontColor=#FFFFFF;spacingLeft=8;spacingTop=2;whiteSpace=wrap;" value="conn.rollback() on failure · Re-raises to scheduler · Skips Gold for this run" vertex="1">
+          <mxGeometry height="36" width="262" x="226" y="214" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-vd2" parent="c2-panel" style="line;strokeColor=#2a1e50;fillColor=none;horizontal=0;" value="" vertex="1">
+          <mxGeometry height="254" width="8" x="504" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-bg" parent="c2-panel" style="rounded=1;arcSize=6;fillColor=#160f2a;strokeColor=#5b21b6;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="254" width="290" x="516" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-hdr" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#a78bfa;letterSpacing=1;spacingLeft=8;" value="GOLD ETL  (process_gold.py / master_gold_etl.sql)" vertex="1">
+          <mxGeometry height="20" width="290" x="516" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-div" parent="c2-panel" style="line;strokeColor=#3a2a6a;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="6" width="274" x="524" y="56" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-b1" parent="c2-panel" style="rounded=1;arcSize=10;fillColor=#1c1030;strokeColor=#4a2a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="274" x="524" y="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-b1-t" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#c4b5fd;spacingLeft=8;" value="Transactional Load  (reads silver.v_events)" vertex="1">
+          <mxGeometry height="18" width="274" x="524" y="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-b1-d" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=7;fontColor=#FFFFFF;spacingLeft=8;spacingTop=2;whiteSpace=wrap;" value="BEGIN ... COMMIT · All-or-nothing · ROLLBACK if any step fails · watermark unchanged on error" vertex="1">
+          <mxGeometry height="36" width="274" x="524" y="82" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-b2" parent="c2-panel" style="rounded=1;arcSize=10;fillColor=#1c1030;strokeColor=#4a2a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="274" x="524" y="132" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-b2-t" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#c4b5fd;spacingLeft=8;" value="Dimension Upserts  (writes Gold)" vertex="1">
+          <mxGeometry height="18" width="274" x="524" y="132" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-b2-d" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=7;fontColor=#FFFFFF;spacingLeft=8;spacingTop=2;whiteSpace=wrap;" value="DISTINCT ON (id) ORDER BY event_time DESC · WHERE last_event_time &lt; EXCLUDED.last_event_time · Late-arriving protection" vertex="1">
+          <mxGeometry height="36" width="274" x="524" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-b3" parent="c2-panel" style="rounded=1;arcSize=10;fillColor=#1c1030;strokeColor=#4a2a8a;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="56" width="274" x="524" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-b3-t" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontStyle=1;fontColor=#c4b5fd;spacingLeft=8;" value="Fact Table Load  (writes Gold)" vertex="1">
+          <mxGeometry height="18" width="274" x="524" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-gld-b3-d" parent="c2-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=7;fontColor=#FFFFFF;spacingLeft=8;spacingTop=2;whiteSpace=wrap;" value="WHERE processed_at &gt; watermark · FK-enforced · Idempotent · ON CONFLICT DO NOTHING" vertex="1">
+          <mxGeometry height="36" width="274" x="524" y="214" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-22" parent="c2-panel" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;autosize=1;resizable=0;" value="&lt;span style=&quot;font-size: 9px; font-weight: 700; text-wrap-mode: nowrap;&quot;&gt;&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;Container 2 — ETL Scheduler (process_etl.py)&lt;/font&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="30" width="220" x="18" y="-4" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-38" edge="1" parent="c2-panel" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#FFD966;strokeWidth=1.5;fontColor=#fb923c;fontSize=8;labelBackgroundColor=#141414;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;endFill=1;flowAnimation=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="-24" />
+              <mxPoint x="553" y="-24" />
+            </Array>
+            <mxPoint x="400" y="-232.82" as="sourcePoint" />
+            <mxPoint x="553.4099999999999" y="36.000000000000114" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-39" connectable="0" parent="ZqDuB59zU2ASQcCFy2xq-38" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=7;" value="&lt;font&gt;Fetch (via View / Watermark&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.3023" y="2" as="geometry">
+            <mxPoint x="6" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arr-sil-reads-bronze" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#fb923c;strokeWidth=1.5;fontColor=#fb923c;fontSize=8;labelBackgroundColor=#141414;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;flowAnimation=1;startArrow=blockThin;startFill=0;flowAnimationDirection=reverse;dashed=1;" value="&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;Anti-join read&lt;/font&gt;">
+          <mxGeometry relative="1" x="-0.008" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="599.04" y="524" />
+              <mxPoint x="550.04" y="524" />
+            </Array>
+            <mxPoint x="755.6399999999999" y="650" as="sourcePoint" />
+            <mxPoint x="599" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-panel" parent="1" style="swimlane;startSize=20;fillColor=#647687;strokeColor=#314354;fontColor=#ffffff;fontSize=8;fontStyle=1;letterSpacing=2;rounded=1;arcSize=6;strokeWidth=1;" value="LEGEND" vertex="1">
+          <mxGeometry height="190" width="420" x="-10" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="leg-solid" edge="1" parent="legend-panel" style="edgeStyle=none;html=1;strokeColor=#38bdf8;strokeWidth=1.5;endArrow=block;endFill=1;flowAnimation=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="12" y="42" as="sourcePoint" />
+            <mxPoint x="72" y="42" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg-solid-t" parent="legend-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontColor=#FFFFFF;" value="Primary data flow (write / ingest)" vertex="1">
+          <mxGeometry height="20" width="330" x="78" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="leg-dash-r" edge="1" parent="legend-panel" style="edgeStyle=none;html=1;strokeColor=#FB923C;strokeWidth=1.5;endArrow=block;endFill=1;flowAnimation=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="12" y="70" as="sourcePoint" />
+            <mxPoint x="72" y="70" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg-dash-r-t" parent="legend-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontColor=#FFFFFF;" value="Read / query (anti-join or watermark)" vertex="1">
+          <mxGeometry height="20" width="330" x="78" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="leg-dash-w" edge="1" parent="legend-panel" style="edgeStyle=none;html=1;strokeColor=#FFFFFF;strokeWidth=1.5;endArrow=block;endFill=1;flowAnimation=1;fillColor=#f5f5f5;" value="&lt;div&gt;&lt;br/&gt;&lt;/div&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="40" y="98" />
+            </Array>
+            <mxPoint x="12" y="98" as="sourcePoint" />
+            <mxPoint x="72" y="98" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg-dash-w-t" parent="legend-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontColor=#FFFFFF;" value="Scheduled ETL write (Container 2 → Warehouse)" vertex="1">
+          <mxGeometry height="20" width="330" x="78" y="88" as="geometry" />
+        </mxCell>
+        <mxCell id="leg-view" parent="legend-panel" style="rounded=1;arcSize=6;fillColor=#0e2218;strokeColor=#10b981;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="14" width="60" x="10" y="154" as="geometry" />
+        </mxCell>
+        <mxCell id="leg-view-t" parent="legend-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontColor=#FFFFFF;" value="PostgreSQL VIEW (no disk copy — transformation on read)" vertex="1">
+          <mxGeometry height="20" width="330" x="76" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-75" parent="legend-panel" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=8;fontColor=#FFFFFF;" value="Scheduled ETL write (Container 2 → Warehouse)" vertex="1">
+          <mxGeometry height="20" width="330" x="78" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-76" edge="1" parent="legend-panel" style="edgeStyle=none;html=1;strokeColor=#FFD966;strokeWidth=1.5;endArrow=block;endFill=1;flowAnimation=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points" />
+            <mxPoint x="10" y="130" as="sourcePoint" />
+            <mxPoint x="70" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-25" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#FFFFFF;strokeWidth=1.5;fontColor=#fb923c;fontSize=8;labelBackgroundColor=#141414;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;endFill=1;flowAnimation=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="830" y="650" as="sourcePoint" />
+            <mxPoint x="830" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-27" connectable="0" parent="ZqDuB59zU2ASQcCFy2xq-25" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;code data-path-to-node=&quot;4,3,0&quot; data-index-in-node=&quot;14&quot;&gt;&lt;font style=&quot;font-size: 7px;&quot;&gt;Batch Insert (Cleaned)&lt;/font&gt;&lt;/code&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.2566" as="geometry">
+            <mxPoint y="42" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-40" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#FFD966;strokeWidth=1.5;fontColor=#fb923c;fontSize=8;labelBackgroundColor=#141414;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;endFill=1;flowAnimation=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1080" y="650" as="sourcePoint" />
+            <mxPoint x="1081.5" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZqDuB59zU2ASQcCFy2xq-41" connectable="0" parent="ZqDuB59zU2ASQcCFy2xq-40" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=7;" value="Transactional UPSERT" vertex="1">
+          <mxGeometry relative="1" x="0.0821" as="geometry">
+            <mxPoint y="18" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

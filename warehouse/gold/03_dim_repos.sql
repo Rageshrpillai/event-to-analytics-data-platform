@@ -13,7 +13,7 @@ CREATE TABLE gold.dim_repos (
     last_event_time     TIMESTAMPTZ
 );
 
-CREATE UNIQUE INDEX idx_dim_repos_name ON gold.dim_repos (repo_name);
+CREATE INDEX idx_dim_repos_name ON gold.dim_repos (repo_name);
 CREATE INDEX idx_dim_repos_owner ON gold.dim_repos (repo_owner);
 CREATE INDEX idx_dim_repos_project ON gold.dim_repos (repo_project);
 

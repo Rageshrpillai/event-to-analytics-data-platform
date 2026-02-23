@@ -51,7 +51,7 @@ CREATE INDEX idx_silver_event_time   ON silver.events (event_time);
 CREATE INDEX idx_silver_processed_at ON silver.events (processed_at);
 
 -- ============================================================
--- D. MONITORING (Run this next week!)
+-- D. MONITORING
 -- ============================================================
 /*
 SELECT schemaname, indexname, idx_scan 

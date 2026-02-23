@@ -28,26 +28,30 @@ def setup_database():
 
     if not all(db_config.values()):
         raise ValueError("Missing DB environment variables")
+    sql_files = [
+            "warehouse/bronze/ddl.sql",
+            "warehouse/silver/ddl.sql",
+            "warehouse/silver/view_silver.sql",
+            "warehouse/gold/01_dim_date.sql",
+            "warehouse/gold/02_dim_actors.sql",
+            "warehouse/gold/03_dim_repos.sql",
+            "warehouse/gold/04_dim_event_types.sql",
+            "warehouse/gold/05_fact_events.sql",
+        ]
 
     try:
-        # 3. Connect using Context Manager
-        with psycopg2.connect(**db_config) as conn:
-            with conn.cursor() as cursor:
-                logger.info("🔌 Connected to Database...")
-
-                # 4. Read and Execute Bronze DDL
-                file_path = "warehouse/bronze/ddl.sql"
-                logger.info(f" Executing: {file_path}")
-                
-                with open(file_path, "r") as f:
-                    sql_script = f.read()
-                    cursor.execute(sql_script)
-                
-                logger.info(" Bronze Layer Created Successfully!")
-                
-        
+            with psycopg2.connect(**db_config) as conn:
+                with conn.cursor() as cursor:
+                    for file_path in sql_files:
+                        logger.info(f"Executing: {file_path}")
+                        with open(file_path, "r") as f:
+                            cursor.execute(f.read())
+                        logger.info(f" Done: {file_path}")
+                        
+            logger.info(" Full database setup complete!")
+            
     except Exception as e:
-        logger.error(f" Setup Failed: {e}")
+            logger.error(f"Setup Failed: {e}")
 
 if __name__ == "__main__":
     setup_database()
